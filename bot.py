@@ -112,7 +112,7 @@ async def process_upload(message, file_id, extension, max_size=5242880):
 
     try:
         url = await asyncio.to_thread(upload_to_imgbb, file_path)
-        links = f'<b>Your image link:</b> <a href="{url}">{url}</a>'
+        links = f'<b>Your image link:</b> <a href="{url}">View Image</a>'
         await bot.edit_message_text(links, chat_id=msg.chat.id, message_id=msg.message_id, disable_web_page_preview=False, parse_mode="html")
     except Exception as e:
         await bot.edit_message_text(f"<code>Something went wrong: {e}</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
