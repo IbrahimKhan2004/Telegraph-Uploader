@@ -34,8 +34,8 @@ async def start_command(message):
     )
     text = (
         "<b>Hey there,</b>\n\n"
-        "<b>I'm Image to graph.org Uploader.</b>\n\n"
-        "<b>Simply send me a photo, video or gif to upload and get graph.org link.</b>"
+        "<b>I'm a Professional Image Uploader Bot.</b>\n\n"
+        "<b>Simply send me a photo, video or gif and get an instant, high-quality hosted link.</b>"
     )
     await bot.reply_to(message, text, reply_markup=buttons, parse_mode='html')
 
@@ -48,7 +48,7 @@ async def help_command(message):
     )
     text = (
         "Just Send Me A Video/gif/photo Upto 5mb.\n\n"
-        "I'll upload and give you the direct links (graph.org, telegra.ph, tele.pe)."
+        "I'll upload it and give you a direct, shareable link instantly."
     )
     await bot.reply_to(message, text, reply_markup=buttons, parse_mode='html')
 
@@ -57,7 +57,7 @@ async def callback_query(call):
     if call.data == "help":
         await bot.edit_message_text(
             "Just Send Me A Video/gif/photo Upto 5mb.\n\n"
-            "I'll upload and give you the direct links (graph.org, telegra.ph, tele.pe).",
+            "I'll upload it and give you a direct, shareable link instantly.",
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=InlineKeyboardMarkup().add(
@@ -71,8 +71,8 @@ async def callback_query(call):
     elif call.data == "home":
         await bot.edit_message_text(
             "<b>Hey there,</b>\n\n"
-            "<b>I'm Image to graph.org Uploader.</b>\n\n"
-            "<b>Simply send me a photo, video or gif to upload and get graph.org link.</b>",
+            "<b>I'm a Professional Image Uploader Bot.</b>\n\n"
+            "<b>Simply send me a photo, video or gif and get an instant, high-quality hosted link.</b>",
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=InlineKeyboardMarkup().add(
@@ -112,8 +112,8 @@ async def process_upload(message, file_id, extension, max_size=5242880):
 
     try:
         url = await asyncio.to_thread(upload_to_imgbb, file_path)
-        links = f"<b>imgbb:</b> {url}"
-        await bot.edit_message_text(links, chat_id=msg.chat.id, message_id=msg.message_id, disable_web_page_preview=True, parse_mode="html")
+        links = f'<b>Your image link:</b> <a href="{url}">{url}</a>'
+        await bot.edit_message_text(links, chat_id=msg.chat.id, message_id=msg.message_id, disable_web_page_preview=False, parse_mode="html")
     except Exception as e:
         await bot.edit_message_text(f"<code>Something went wrong: {e}</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
     finally:
