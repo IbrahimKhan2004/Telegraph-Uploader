@@ -33,9 +33,11 @@ async def start_command(message):
         InlineKeyboardButton('Close', callback_data='close')
     )
     text = (
-        "<b>Hey there,</b>\n\n"
-        "<b>I'm a Professional Image Uploader Bot.</b>\n\n"
-        "<b>Simply send me a photo, video or gif and get an instant, high-quality hosted link.</b>"
+        "<b>👋 Hey there!</b>\n\n"
+        "<b>I am a Professional Image Uploader Bot.</b>\n\n"
+        "<b>Simply send me a photo or GIF, and I'll instantly generate a high-quality, direct hosted link for you.</b>\n\n"
+        "<b>✅ Supported Formats:</b> Photos and GIFs (Up to 5MB)\n"
+        "<b>⚡️ Powered By:</b> ImgBB API"
     )
     await bot.reply_to(message, text, reply_markup=buttons, parse_mode='html')
 
@@ -47,8 +49,13 @@ async def help_command(message):
         InlineKeyboardButton('Close', callback_data='close')
     )
     text = (
-        "Just Send Me A Video/gif/photo Upto 5mb.\n\n"
-        "I'll upload it and give you a direct, shareable link instantly."
+        "<b>ℹ️ Help Guide</b>\n\n"
+        "<b>How to use:</b>\n"
+        "Just send me any Photo or GIF.\n\n"
+        "<b>Limitations:</b>\n"
+        "• Maximum file size is 5MB.\n\n"
+        "<b>Tech Stack:</b>\n"
+        "• Uploads are securely powered by the ImgBB API, providing you with direct, shareable links instantly."
     )
     await bot.reply_to(message, text, reply_markup=buttons, parse_mode='html')
 
@@ -56,8 +63,13 @@ async def help_command(message):
 async def callback_query(call):
     if call.data == "help":
         await bot.edit_message_text(
-            "Just Send Me A Video/gif/photo Upto 5mb.\n\n"
-            "I'll upload it and give you a direct, shareable link instantly.",
+            "<b>ℹ️ Help Guide</b>\n\n"
+            "<b>How to use:</b>\n"
+            "Just send me any Photo or GIF.\n\n"
+            "<b>Limitations:</b>\n"
+            "• Maximum file size is 5MB.\n\n"
+            "<b>Tech Stack:</b>\n"
+            "• Uploads are securely powered by the ImgBB API, providing you with direct, shareable links instantly.",
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=InlineKeyboardMarkup().add(
@@ -70,9 +82,11 @@ async def callback_query(call):
         await bot.delete_message(call.message.chat.id, call.message.message_id)
     elif call.data == "home":
         await bot.edit_message_text(
-            "<b>Hey there,</b>\n\n"
-            "<b>I'm a Professional Image Uploader Bot.</b>\n\n"
-            "<b>Simply send me a photo, video or gif and get an instant, high-quality hosted link.</b>",
+            "<b>👋 Hey there!</b>\n\n"
+            "<b>I am a Professional Image Uploader Bot.</b>\n\n"
+            "<b>Simply send me a photo or GIF, and I'll instantly generate a high-quality, direct hosted link for you.</b>\n\n"
+            "<b>✅ Supported Formats:</b> Photos and GIFs (Up to 5MB)\n"
+            "<b>⚡️ Powered By:</b> ImgBB API",
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=InlineKeyboardMarkup().add(
@@ -112,7 +126,7 @@ async def process_upload(message, file_id, extension, max_size=5242880):
 
     try:
         url = await asyncio.to_thread(upload_to_imgbb, file_path)
-        links = f'<b>Your image link:</b> <a href="{url}">View Image</a>'
+        links = f'Your image link: <a href="{url}">{{Here}}</a>'
         await bot.edit_message_text(links, chat_id=msg.chat.id, message_id=msg.message_id, disable_web_page_preview=False, parse_mode="html")
     except Exception as e:
         await bot.edit_message_text(f"<code>Something went wrong: {e}</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
