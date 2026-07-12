@@ -1,139 +1,137 @@
-#    This file is part of the ChannelAutoForwarder distribution (https://github.com/Benchamxd/Telegraph-Uploader).
-#    Copyright (c) 2021 Rithunand
-#    
-#    This program is free software: you can redistribute it and/or modify  
-#    it under the terms of the GNU General Public License as published by  
-#    the Free Software Foundation, version 3.
-# 
-#    This program is distributed in the hope that it will be useful, but 
-#    WITHOUT ANY WARRANTY; without even the implied warranty of 
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
-#    General Public License for more details.
-# 
-#    License can be found in < https://github.com/Benchamxd/Telegraph-Uploader/blob/main/License> 
-
 import os
+import asyncio
+from aiohttp import web
+from telebot.async_telebot import AsyncTeleBot
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telegraph import upload_file
-import pyrogram
-from pyrogram import filters, Client
 from sample_config import Config
-from pyrogram.types import (
-    InlineQueryResultArticle, InputTextMessageContent,
-    InlineKeyboardMarkup, InlineKeyboardButton,
-    CallbackQuery, InlineQuery)
 
-Tgraph = Client(
-   "Telegra.ph Uploader",
-   api_id=Config.APP_ID,
-   api_hash=Config.API_HASH,
-   bot_token=Config.TG_BOT_TOKEN,
-)
+bot = AsyncTeleBot(Config.TG_BOT_TOKEN)
 
-@Tgraph.on_message(filters.photo)
-async def uploadphoto(client, message):
-  msg = await message.reply_text("`Downloading`")
-  userid = str(message.chat.id)
-  img_path = (f"./DOWNLOADS/{userid}.jpg")
-  img_path = await client.download_media(message=message, file_name=img_path)
-  await msg.edit_text("`Uploading.....`")
-  try:
-    tlink = upload_file(img_path)
-  except:
-    await msg.edit_text("`Something went wrong`") 
-  else:
-    await msg.edit_text(f"https://graph.org{tlink[0]}")     
-    os.remove(img_path) 
+if not os.path.isdir("DOWNLOADS"):
+    os.makedirs("DOWNLOADS")
 
-@Tgraph.on_message(filters.animation)
-async def uploadgif(client, message):
-  if(message.animation.file_size < 5242880):
-    msg = await message.reply_text("`Downloading`")
-    userid = str(message.chat.id)
-    gif_path = (f"./DOWNLOADS/{userid}.mp4")
-    gif_path = await client.download_media(message=message, file_name=gif_path)
-    await msg.edit_text("`Uploading.....`")
-    try:
-      tlink = upload_file(gif_path)
-      await msg.edit_text(f"https://graph.org{tlink[0]}")   
-      os.remove(gif_path)   
-    except:
-      await msg.edit_text("Something really Happend Wrong...") 
-  else:
-    await message.reply_text("Size Should Be Less Than 5 mb")
+async def handle_ping(request):
+    return web.Response(text="Hello, I am healthy!")
 
-@Tgraph.on_message(filters.video)
-async def uploadvid(client, message):
-  if(message.video.file_size < 5242880):
-    msg = await message.reply_text("`Downloading`")
-    userid = str(message.chat.id)
-    vid_path = (f"./DOWNLOADS/{userid}.mp4")
-    vid_path = await client.download_media(message=message, file_name=vid_path)
-    await msg.edit_text("`Uploading.....`")
-    try:
-      tlink = upload_file(vid_path)
-      await msg.edit_text(f"https://graph.org{tlink[0]}")     
-      os.remove(vid_path)   
-    except:
-      await msg.edit_text("Something really Happend Wrong...") 
-  else:
-    await message.reply_text("Size Should Be Less Than 5 mb")
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get('/', handle_ping)
+    app.router.add_get('/ping', handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    print(f"Web server started on port {port}")
 
-@Tgraph.on_message(filters.command(["start"]))
-async def home(client, message):
-  buttons = [[
+@bot.message_handler(commands=['start'])
+async def start_command(message):
+    buttons = InlineKeyboardMarkup()
+    buttons.add(
         InlineKeyboardButton('Help', callback_data='help'),
         InlineKeyboardButton('Close', callback_data='close')
-    ],
-    [
-        InlineKeyboardButton('Our Channel', url='https://t.me/Eliteflix_Official'),
-        InlineKeyboardButton('Owner', url='https://t.me/BashAFK')
-    ]]
-  reply_markup = InlineKeyboardMarkup(buttons)
-  await Tgraph.send_message(
-        chat_id=message.chat.id,
-        text="""<b>Hey there,
-        
-I'm a Graph.org Uploader That Can Upload Photo, Video And Gif
-        
-Simply send me photo, video or gif to upload to Graph.org
-        
-Made With Love By @BashAFK</b>""",
-        reply_markup=reply_markup,
-        parse_mode="html",
-        reply_to_message_id=message.message_id
     )
+    text = (
+        "<b>Hey there,</b>\n\n"
+        "<b>I'm Image to graph.org Uploader.</b>\n\n"
+        "<b>Simply send me a photo, video or gif to upload and get graph.org link.</b>"
+    )
+    await bot.reply_to(message, text, reply_markup=buttons, parse_mode='html')
 
-@Tgraph.on_message(filters.command(["help"]))
-async def help(client, message):
-  buttons = [[
+@bot.message_handler(commands=['help'])
+async def help_command(message):
+    buttons = InlineKeyboardMarkup()
+    buttons.add(
         InlineKeyboardButton('Home', callback_data='home'),
         InlineKeyboardButton('Close', callback_data='close')
-    ],
-    [
-        InlineKeyboardButton('Our Channel', url='https://t.me/Eliteflix_Official')
-    ]]
-  reply_markup = InlineKeyboardMarkup(buttons)
-  await Tgraph.send_message(
-        chat_id=message.chat.id,
-        text="""There Is Nothung To KnowMore,
+    )
+    text = (
+        "Just Send Me A Video/gif/photo Upto 5mb.\n\n"
+        "I'll upload and give you the direct links (graph.org, telegra.ph, tele.pe)."
+    )
+    await bot.reply_to(message, text, reply_markup=buttons, parse_mode='html')
+
+@bot.callback_query_handler(func=lambda call: True)
+async def callback_query(call):
+    if call.data == "help":
+        await bot.edit_message_text(
+            "Just Send Me A Video/gif/photo Upto 5mb.\n\n"
+            "I'll upload and give you the direct links (graph.org, telegra.ph, tele.pe).",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=InlineKeyboardMarkup().add(
+                InlineKeyboardButton('Home', callback_data='home'),
+                InlineKeyboardButton('Close', callback_data='close')
+            ),
+            parse_mode='html'
+        )
+    elif call.data == "close":
+        await bot.delete_message(call.message.chat.id, call.message.message_id)
+    elif call.data == "home":
+        await bot.edit_message_text(
+            "<b>Hey there,</b>\n\n"
+            "<b>I'm Image to graph.org Uploader.</b>\n\n"
+            "<b>Simply send me a photo, video or gif to upload and get graph.org link.</b>",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=InlineKeyboardMarkup().add(
+                InlineKeyboardButton('Help', callback_data='help'),
+                InlineKeyboardButton('Close', callback_data='close')
+            ),
+            parse_mode='html'
+        )
+
+async def process_upload(message, file_id, extension, max_size=5242880):
+    file_info = await bot.get_file(file_id)
+
+    if file_info.file_size > max_size:
+        await bot.reply_to(message, "Size Should Be Less Than 5 mb")
+        return
+
+    msg = await bot.reply_to(message, "<code>Downloading...</code>", parse_mode="html")
+    userid = str(message.chat.id)
+    file_path = f"./DOWNLOADS/{userid}_{file_id}.{extension}"
+
+    downloaded_file = await bot.download_file(file_info.file_path)
+    with open(file_path, 'wb') as new_file:
+        new_file.write(downloaded_file)
         
-Just Send Me A Video/gif/photo Upto 5mb.
+    await bot.edit_message_text("<code>Uploading...</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
 
-i'll upload to graph.org and give you the direct link""",
-        reply_markup=reply_markup,
-        parse_mode="html",
-        reply_to_message_id=message.message_id
-    )                           
-@Tgraph.on_callback_query()
-async def button(Tgraph, update):
-      cb_data = update.data
-      if "help" in cb_data:
-        await update.message.delete()
-        await help(Tgraph, update.message)
-      elif "close" in cb_data:
-        await update.message.delete() 
-      elif "home" in cb_data:
-        await update.message.delete()
-        await home(Tgraph, update.message)
+    try:
+        tlink = await asyncio.to_thread(upload_file, file_path)
+        path = tlink[0]
+        links = (
+            f"<b>graph.org:</b> https://graph.org{path}\n"
+            f"<b>telegra.ph:</b> https://telegra.ph{path}\n"
+            f"<b>tele.pe:</b> https://tele.pe{path}"
+        )
+        await bot.edit_message_text(links, chat_id=msg.chat.id, message_id=msg.message_id, disable_web_page_preview=True, parse_mode="html")
+    except Exception as e:
+        await bot.edit_message_text(f"<code>Something went wrong: {e}</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
-Tgraph.run()
+@bot.message_handler(content_types=['photo'])
+async def handle_photo(message):
+    file_id = message.photo[-1].file_id
+    await process_upload(message, file_id, "jpg")
+
+@bot.message_handler(content_types=['animation'])
+async def handle_animation(message):
+    file_id = message.animation.file_id
+    await process_upload(message, file_id, "mp4")
+
+@bot.message_handler(content_types=['video'])
+async def handle_video(message):
+    file_id = message.video.file_id
+    await process_upload(message, file_id, "mp4")
+
+async def main():
+    await start_web_server()
+    await bot.polling(non_stop=True)
+
+if __name__ == '__main__':
+    asyncio.run(main())

@@ -1,48 +1,37 @@
-# Telegraph-Uploader
-A Telegram Bot Written In Python To Upload Medias To telegra.ph   
+# Image to graph.org Uploader Bot
 
-# DEPLOY
-YOU CAN SIMPLY DEPLOY ON HEROKU BY CLICKING THE BUTTON BELOW
+A simple, asynchronous Telegram bot that uploads images, GIFs, and videos (under 5MB) to graph.org. It also outputs links for telegra.ph and tele.pe so you always have a working link in India.
 
-[![Deploy To Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Benchamxd/Telegraph-Uploader/)
+The bot features a built-in `aiohttp` web server to pass Render.com health checks and stay awake!
 
-# Local Machine
-Clone the repository
+## Features
+- Uploads Photo, GIF, and Video up to 5MB.
+- Asynchronous setup using `pyTelegramBotAPI` and `asyncio`.
+- Output links for `graph.org`, `telegra.ph`, and `tele.pe`.
+- A built-in web server listening on the `$PORT` environment variable for `Render` health checks.
+- Clean and modern HTML parse mode formatting.
 
-Install requirements: pip3 install -r requirements.txt
+## Deployment on Render.com
+1. Fork or download this repository.
+2. Sign up on [Render.com](https://render.com) and create a new **Web Service**.
+3. Connect your GitHub repository.
+4. Set the runtime environment to **Docker**.
+5. Render will automatically detect the `Dockerfile` and build it.
+6. In the **Environment Variables** section, add your Bot Token:
+   - Key: `TG_BOT_TOKEN`
+   - Value: `your_bot_token_here` (get it from [@BotFather](https://t.me/botfather) on Telegram)
+7. Click **Create Web Service**.
+8. The bot will deploy, and the built-in web server will keep it healthy!
 
-edit the sample_config.py wih your configs
+## Environment Variables
+- `TG_BOT_TOKEN`: The API token from BotFather (Required).
+- `PORT`: Automatically set by Render.com for the web server to bind to (Default is 8080).
 
-python3 bot.py
-
-Now send /start to you bot to see if it is running!
-
-
-# Varibels
-
-``TG_BOT_TOKEN : YOUR BOT TOKEN. GET IT FROM @BOTFATHER``
-
-``START_MESSAGE : YOUR TELEGRAM APP ID.``
-
-``BOT_USER_NAME : YOUR TELEGRAM API HASH``
-
-## SUPPORT
-
-For any type of help on deploy. Contact us on [INDUS CHATS](https://t.me/induschats).
-
-# Thanks To
-Thanks To [AlbertEinsteinTg](https://github.com/AlbertEinsteinTg) For Helping Me in Some Cases
-
-Thanks To Owners Of Libraries That Used In The Development Of This Repo
-# Licence
-[![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)  
-
-[Telegra.ph-Uploader](https://github.com/Benchamxd/Telegraph-Uploader/) is Free Software: You can use, study share and improve it at your
-will. Specifically you can redistribute and/or modify it under the terms of the
-[GNU General Public License](https://www.gnu.org/licenses/gpl.html) as
-published by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version. 
-
-##
-
-**Star this Repo if you Liked it ⭐⭐⭐**
+## Local Testing
+1. Clone the repository and `cd` into it.
+2. Install dependencies: `pip install -r requirements.txt`
+3. Export your bot token:
+   ```bash
+   export TG_BOT_TOKEN="your_bot_token_here"
+   ```
+4. Run the bot: `python3 bot.py`
