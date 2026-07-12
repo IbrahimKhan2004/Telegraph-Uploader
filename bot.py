@@ -3,7 +3,7 @@ import asyncio
 from aiohttp import web
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from telegraph import upload_file
+import requests
 from sample_config import Config
 
 bot = AsyncTeleBot(Config.TG_BOT_TOKEN)
@@ -82,6 +82,17 @@ async def callback_query(call):
             parse_mode='html'
         )
 
+def upload_to_imgbb(file_path):
+    with open(file_path, 'rb') as f:
+        resp = requests.post(
+            "https://api.imgbb.com/1/upload",
+            data={"key": Config.IMGBB_API_KEY},
+            files={"image": f}
+        ).json()
+    if not resp.get("success"):
+        raise Exception(resp.get("error", {}).get("message", "imgbb upload failed"))
+    return resp["data"]["url"]
+
 async def process_upload(message, file_id, extension, max_size=5242880):
     file_info = await bot.get_file(file_id)
 
@@ -100,13 +111,8 @@ async def process_upload(message, file_id, extension, max_size=5242880):
     await bot.edit_message_text("<code>Uploading...</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
 
     try:
-        tlink = await asyncio.to_thread(upload_file, file_path)
-        path = tlink[0]
-        links = (
-            f"<b>graph.org:</b> https://graph.org{path}\n"
-            f"<b>telegra.ph:</b> https://telegra.ph{path}\n"
-            f"<b>tele.pe:</b> https://tele.pe{path}"
-        )
+        url = await asyncio.to_thread(upload_to_imgbb, file_path)
+        links = f"<b>imgbb:</b> {url}"
         await bot.edit_message_text(links, chat_id=msg.chat.id, message_id=msg.message_id, disable_web_page_preview=True, parse_mode="html")
     except Exception as e:
         await bot.edit_message_text(f"<code>Something went wrong: {e}</code>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="html")
